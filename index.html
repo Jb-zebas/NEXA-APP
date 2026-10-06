@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#6c5ce7">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="NEXA — Pide comida, reserva y compra cerca de ti">
+  <title>NEXA</title>
+
+  <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,800&display=swap">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="acceso.css">
+</head>
+
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="nexaMark" viewBox="0 0 100 110">
+      <g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M50 4 L94 29 V79 L50 104 L6 79 V29 Z" stroke-width="3" fill="currentColor" fill-opacity=".06"/>
+        <path d="M6 29 L34 79 M94 29 L66 79 M50 4 L34 79 M50 4 L66 79 M50 104 L34 79 M50 104 L66 79" stroke-width=".9" opacity=".45"/>
+        <path d="M31 80 V30 H41 L59 61 V30 H69 V80 H59 L41 49 V80 Z" stroke-width="2.6" fill="currentColor" fill-opacity=".14"/>
+      </g>
+    </symbol>
+  </svg>
+
+  <div class="desktop">
+    <div class="editor">
+      <div class="editor-top">
+        <div class="traffic-lights">
+          <span class="red"></span>
+          <span class="yellow"></span>
+          <span class="green"></span>
+        </div>
+        <span class="editor-title">NEXA — Visual Studio Code</span>
+      </div>
+
+      <div class="editor-content">
+        <div class="phone-area">
+          <div class="phone">
+            <div class="dynamic-island"></div>
+
+            <div class="status-bar">
+              <span id="statusTime">10:53</span>
+              <div class="status-icons">
+                <span class="sig">◔</span>
+                <span class="wifi">▪</span>
+                <span class="bat">▰</span>
+              </div>
+            </div>
+
+            <div class="phone-screen" id="phoneScreen">
+
+              <!-- Presentación -->
+              <section id="onboardingScreen" class="screen onboarding-screen hidden">
+                <div class="ob-slides" id="obSlides">
+                  <div class="ob-slide active">
+                    <div class="ob-art">🍔👟💈</div>
+                    <h2>Todo lo que necesitas cerca de ti</h2>
+                    <p>Comida, moda, farmacia, reservas y más en un solo lugar.</p>
+                  </div>
+                  <div class="ob-slide">
+                    <div class="ob-art">📍</div>
+                    <h2>Entrega rápida en Gijón</h2>
+                    <p>Elige tu dirección y recibe en minutos. O reserva mesa y turno.</p>
+                  </div>
+                  <div class="ob-slide">
+                    <div class="ob-art">✨</div>
+                    <h2>NEXA IA te ayuda</h2>
+                    <p>Dile qué quieres y te lleva directo al negocio o a la reserva.</p>
+                  </div>
+                </div>
+
+                <div class="ob-dots" id="obDots"><i class="on"></i><i></i><i></i></div>
+                <div class="ob-actions">
+                  <button type="button" class="link-btn" id="obSkip">Saltar</button>
+                  <button type="button" class="main-button" id="obNext">Siguiente</button>
+                </div>
+              </section>
+
+              <!-- Entrada -->
+              <section id="splashScreen" class="screen splash-screen">
+                <div class="splash-bg"></div>
+                <div class="splash-center">
+                  <svg class="nexa-mark" viewBox="0 0 100 110" aria-hidden="true"><use href="#nexaMark"/></svg>
+                  <div class="splash-word">NEXA</div>
+                  <p class="splash-tag">Comida · Moda · Reservas</p>
+                </div>
+                <button type="button" class="start-button" onclick="iniciar()">Empezar</button>
+              </section>
+
+              <!-- Acceso -->
+              <section id="welcomeScreen" class="screen welcome-screen hidden">
+                <div class="welcome-background"></div>
+                <div class="welcome-content">
+                  <div class="logo logo-hero">
+                    <svg class="nexa-mark" viewBox="0 0 100 110" aria-hidden="true"><use href="#nexaMark"/></svg>
+                    <span>NEXA</span>
+                  </div>
+
+                  <h1 id="welcomeTitle">Bienvenido.</h1>
+                  <p id="welcomeSub">Descubre todo lo que necesitas cerca de ti.</p>
+
+                  <div class="welcome-card" id="authCard">
+                    <div class="auth-tabs" role="tablist">
+                      <button type="button" class="auth-tab active" data-mode="login" role="tab" aria-selected="true">Entrar</button>
+                      <button type="button" class="auth-tab" data-mode="signup" role="tab" aria-selected="false">Crear cuenta</button>
+                    </div>
+
+                    <div class="auth-alert hidden" id="authError" role="alert"></div>
+
+                    <div class="signup-only hidden">
+                      <div class="input-box">
+                        <span aria-hidden="true">☺</span>
+                        <input id="signupName" type="text" placeholder="Tu nombre" autocomplete="name" maxlength="40">
+                      </div>
+                      <small class="campo-error" id="errName"></small>
+                    </div>
+
+                    <div>
+                      <div class="input-box">
+                        <span aria-hidden="true">✉</span>
+                        <input id="loginEmail" type="email" placeholder="Correo electrónico" autocomplete="email" inputmode="email" autocapitalize="none">
+                      </div>
+                      <small class="campo-error" id="errEmail"></small>
+                    </div>
+
+                    <div>
+                      <div class="input-box">
+                        <span aria-hidden="true">🔒</span>
+                        <input id="loginPassword" type="password" placeholder="Contraseña" autocomplete="current-password">
+                        <button type="button" class="pw-toggle" id="pwToggle" aria-label="Mostrar contraseña" aria-pressed="false">◉</button>
+                      </div>
+                      <small class="campo-error" id="errPass"></small>
+                    </div>
+
+                    <div class="pw-meter signup-only hidden" id="pwMeter" data-l="0"><i></i><i></i><i></i><i></i></div>
+                    <small class="pw-hint signup-only hidden">Mínimo 8 caracteres. Mejor con mayúsculas, números y algún símbolo.</small>
+
+                    <label class="terms signup-only hidden">
+                      <input type="checkbox" id="acepto">
+                      <span>Acepto la <button type="button" class="link-btn" onclick="abrirLegal('privacidad')">política de privacidad</button>.</span>
+                    </label>
+
+                    <div class="login-options">
+                      <label><input type="checkbox" id="rememberMe" checked> Mantener sesión</label>
+                      <button type="button" class="link-btn login-only" id="forgotBtn">¿Olvidaste tu contraseña?</button>
+                    </div>
+
+                    <button type="button" class="main-button" id="authSubmit" onclick="entrarApp()">Entrar</button>
+
+                    <div id="socialBlock" class="hidden">
+                      <div class="or"><span></span>O CONTINÚA CON<span></span></div>
+                      <div class="social-buttons">
+                        <button type="button" id="btnGoogle" onclick="loginGoogle()"><b class="g-mark">G</b> Google</button>
+                        <button type="button" id="btnApple" onclick="loginApple()"><b>●</b> Apple</button>
+                      </div>
+                    </div>
+
+                    <p class="create-text login-only" id="createText">
+                      ¿Nuevo en NEXA?
+                      <button type="button" class="link-btn" id="createAccountBtn">Crear una cuenta</button>
+                    </p>
+                    <p class="create-text signup-only hidden">
+                      ¿Ya tienes cuenta?
+                      <button type="button" class="link-btn" onclick="setAuthMode('login')">Entrar</button>
+                    </p>
+
+                    <button type="button" class="outline-action guest-btn" onclick="entrarInvitado()">Entrar como invitado</button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Inicio -->
+              <section id="homeScreen" class="screen home-screen hidden">
+                <header class="app-header">
+                  <button type="button" class="avatar-btn" id="avatarBtn" onclick="mostrarSeccion('perfil')" aria-label="Perfil">A</button>
+
+                  <button type="button" class="header-loc" onclick="abrirDirecciones()">
+                    <small>Entregar en</small>
+                    <b id="hdrAddr">📍 Añadir dirección ⌄</b>
+                  </button>
+
+                  <div class="header-actions">
+                    <button type="button" class="notification" onclick="mostrarSeccion('favoritos')" aria-label="Favoritos">♡</button>
+                    <button type="button" class="notification" onclick="mostrarSeccion('carrito')" aria-label="Carrito">🛍<span class="cart-dot" id="cartDot"></span></button>
+                  </div>
+                </header>
+
+                <div class="home-content" id="homeScroll">
+                  <div class="ptr-indicator" id="ptrIndicator"><span></span> Actualizando…</div>
+
+                  <div class="hello">
+                    <p class="hello-sub" id="helloSub">Hola 👋</p>
+                    <h3 class="hello-title" id="helloTitle">¿Qué te <span>apetece</span> hoy?</h3>
+                  </div>
+
+                  <div class="search-box">
+                    <span aria-hidden="true">⌕</span>
+                    <input id="searchInput" aria-label="Buscar" type="text" placeholder="Busca McDonald's, Nike, farmacia…">
+                    <button type="button" class="filter-btn" onclick="actualizarBusqueda()" aria-label="Buscar">→</button>
+                  </div>
+
+                  <div class="cat-grid" id="catRow"></div>
+                  <div id="orderBanner"></div>
+
+                  <div class="section-title">
+                    <h3>Marcas que te encantan</h3>
+                    <button type="button" onclick="mostrarSeccion('explorar')">Ver todas</button>
+                  </div>
+                  <div class="brand-row" id="brandRow"></div>
+
+                  <div class="promo-row" id="promoRow"></div>
+                  <div class="promo-dots" id="promoDots"></div>
+
+                  <div id="reorderSection" class="hidden">
+                    <div class="section-title"><h3>Pedir otra vez</h3></div>
+                    <div class="re-row" id="reorderRow"></div>
+                  </div>
+
+                  <div class="ai-card">
+                    <div class="ai-icon">✨</div>
+                    <div><strong>NEXA IA</strong><p>Dime qué necesitas y te ayudo.</p></div>
+                    <button type="button" onclick="abrirIA()" aria-label="Abrir NEXA IA">→</button>
+                    <button type="button" id="iaVoiceBtn" aria-label="Activar o quitar la voz">🔊</button>
+                    <button type="button" class="ia-mic" id="iaMic" onclick="toggleMicIA()" aria-label="Hablar con NEXA IA">🎤</button>
+                  </div>
+
+                  <div class="section-title">
+                    <h3>Destacados</h3>
+                    <button type="button" onclick="mostrarSeccion('restaurante')">Ver más</button>
+                  </div>
+                  <div class="featured-row" id="featuredRow"></div>
+
+                  <div class="section-title">
+                    <h3>Populares ahora</h3>
+                    <button type="button" onclick="mostrarSeccion('explorar')">Ver todo</button>
+                  </div>
+                  <div class="places-row" id="placesRow"></div>
+
+                  <div class="section-title">
+                    <h3>Reserva en un toque</h3>
+                    <button type="button" onclick="mostrarSeccion('reservas')">Ver todo</button>
+                  </div>
+                  <div id="bookableRow"></div>
+                </div>
+
+                <nav class="bottom-nav">
+                  <button type="button" class="nav-item active" data-nav="inicio" onclick="mostrarSeccion('inicio')"><span>⌂</span><small>Inicio</small></button>
+                  <button type="button" class="nav-item" data-nav="explorar" onclick="mostrarSeccion('explorar')"><span>⌕</span><small>Explorar</small></button>
+                  <button type="button" class="nav-ai" onclick="abrirIA()" aria-label="NEXA IA">✨</button>
+                  <button type="button" class="nav-item" data-nav="reservas" onclick="mostrarSeccion('reservas')"><span>📅</span><small>Reservas</small></button>
+                  <button type="button" class="nav-item" data-nav="perfil" onclick="mostrarSeccion('perfil')"><span>♙</span><small>Perfil</small></button>
+                </nav>
+              </section>
+
+              <!-- NEXA IA -->
+              <div id="iaPanel" class="ia-panel">
+                <div class="ia-header">
+                  <button type="button" onclick="cerrarIA()" aria-label="Cerrar">←</button>
+                  <div class="ia-title">
+                    <span class="ia-avatar">✨</span>
+                    <strong>NEXA IA</strong>
+                  </div>
+                  <span></span>
+                </div>
+
+                <div class="ia-hero" id="iaHero">
+                  <div class="ia-orb"></div>
+                  <div class="ia-chip">✨ Personalizado para ti</div>
+                  <h2 class="ia-greeting" id="iaGreeting">Hola</h2>
+                  <p class="ia-sub">¿En qué te puedo ayudar hoy?</p>
+                </div>
+
+                <div class="ia-messages" id="chatLog"></div>
+
+                <div class="ia-examples" id="chatSuggest">
+                  <button type="button" data-q="Quiero cortarme el pelo hoy">💈 Cortarme el pelo</button>
+                  <button type="button" data-q="Tengo hambre, ¿qué me recomiendas?">🍔 Tengo hambre</button>
+                  <button type="button" data-q="Quiero unas zapatillas Nike">👟 Zapatillas Nike</button>
+                  <button type="button" data-q="¿Dónde está mi pedido?">📦 Mi pedido</button>
+                  <button type="button" data-q="Reserva una mesa para esta noche">📅 Reservar mesa</button>
+                  <button type="button" data-q="Farmacia abierta cerca">💊 Farmacia cerca</button>
+                </div>
+
+                <div class="ia-input-wrap">
+                  <div class="ia-input">
+                    <input id="iaInput" placeholder="¿Qué necesitas?" aria-label="Escribe tu pregunta" autocomplete="off">
+                    <button type="button" class="ia-mic" id="iaMicPanel" onclick="toggleMicIA()" aria-label="Hablar">🎤</button>
+                    <button type="button" class="ia-send" onclick="preguntarIA()" aria-label="Enviar">↑</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Permiso de ubicación -->
+              <div id="geoGate" class="geo-gate" role="dialog" aria-modal="true" aria-labelledby="gateTitulo" aria-hidden="true">
+                <div class="gate-card">
+                  <div class="gate-art" aria-hidden="true"><span class="gate-pulse"></span><span class="gate-pin">📍</span></div>
+                  <h2 id="gateTitulo">Encuentra lo que tienes cerca</h2>
+                  <p id="gateTexto" class="gate-texto"></p>
+
+                  <ul class="gate-puntos" id="gatePuntos">
+                    <li>Farmacias, restaurantes y tiendas a pasos de ti</li>
+                    <li>Distancias y rutas reales</li>
+                    <li>NEXA no guarda tu ubicación</li>
+                  </ul>
+
+                  <button type="button" class="main-button" id="gatePermitir">Usar mi ubicación</button>
+
+                  <div class="gate-manual hidden" id="gateManual">
+                    <div class="gate-busca">
+                      <input id="gateBusca" class="gate-input" type="text" placeholder="Calle, barrio o ciudad" autocomplete="off">
+                      <button type="button" id="gateBuscar" class="gate-ir" aria-label="Buscar">→</button>
+                    </div>
+                    <div class="gate-resultados" id="gateResultados"></div>
+                  </div>
+
+                  <button type="button" class="outline-action" id="gateManualBtn">Escribir mi dirección</button>
+                  <button type="button" class="link-btn" id="gateOmitir">Ahora no</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="flyItem" class="fly-item" aria-hidden="true"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" defer></script>
+  <script src="qrcode.min.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="avisos.js" defer></script>
+  <script src="./real-place.js"></script>
+  <script src="acceso.js" defer></script>
+  <script src="mejoras.js" defer></script>
+  <script src="ia.js" defer></script>
+
+
+  
+</body>
+
+</html>
